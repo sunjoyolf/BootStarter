@@ -1,28 +1,32 @@
 package com.example.bootstarter;
 
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.provider.Settings;
+import android.util.Log;
+
 import androidx.appcompat.app.AppCompatActivity;
 
 public class MainActivity extends AppCompatActivity {
+    private static final String TAG = "MainActivity";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.i(TAG, "MainActivity started, launching PrintService");
+
         try {
-            Intent intent = new Intent();
-            String pkg = getPackageName();
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                intent.setAction(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
-                intent.setData(Uri.parse("package:" + pkg));
+            Intent svc = new Intent(this, PrintService.class);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                startForegroundService(svc);
             } else {
-                intent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-                intent.setData(Uri.parse("package:" + pkg));
+                startService(svc);
             }
-            startActivity(intent);
-        } catch (Exception e) { e.printStackTrace(); }
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to start PrintService", e);
+        }
+
+        // Close the activity immediately — no UI shown
         finish();
     }
 }
